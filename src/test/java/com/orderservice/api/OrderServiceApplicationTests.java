@@ -1,4 +1,4 @@
-package com.api.orderservice;
+package com.orderservice.api;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
