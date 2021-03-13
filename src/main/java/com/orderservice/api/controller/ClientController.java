@@ -1,26 +1,77 @@
 package com.orderservice.api.controller;
 
 import com.orderservice.api.model.Client;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.orderservice.api.repository.ClientRepository;
+import com.orderservice.api.service.RegisterClientService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
+import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/listar")
+@RequestMapping("/clients")
 public class ClientController {
 
-    @GetMapping
-    public List<Client> list(){
-        List<Client> listClient = new ArrayList<>();
-        listClient.add(new Client(1L, "Luccas","Ly@email.com","(19)999999999"));
-        listClient.add(new Client(2L, "Yuri","Yu@email.com","(19)999999998"));
-        listClient.add(new Client(3L, "Juliana","Ju@email.com","(19)999999979"));
-        listClient.add(new Client(4L, "Antônio","Ant@email.com","(19)999999996"));
-        listClient.add(new Client(5L, "Robson","Robson@email.com","(19)999999967"));
+    @Autowired
+    private ClientRepository repository;
 
-        return listClient;
+    @Autowired
+    private RegisterClientService clientService;
+
+    @GetMapping("/listar")
+    public List<Client> list(){
+        return repository.findAll();
+    }
+
+    @GetMapping("/nome/{name}")
+    public List<Client> findByName(@PathVariable String name){
+        return repository.findByNameIgnoreCase(name);
+    }
+
+    @GetMapping("/nomes/{name}")
+    public List<Client> findByNameContaining(@PathVariable String name){
+        return repository.findByNameContainingIgnoreCase(name);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Client> findById(@PathVariable Long id){
+        Optional<Client> client = repository.findById(id);
+
+        if (client.isPresent()){
+            return ResponseEntity.ok(client.get());
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Client addClient(@Valid @RequestBody Client client){
+        return clientService.salveClient(client);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Client> updateClient(@Valid @PathVariable long id, @RequestBody Client client){
+        if (!repository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        client.setId(id);
+        return ResponseEntity.ok(clientService.salveClient(client));
+
+
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteClient(@PathVariable Long id){
+        if (!repository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        clientService.deleteClient(id);
+        return  ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

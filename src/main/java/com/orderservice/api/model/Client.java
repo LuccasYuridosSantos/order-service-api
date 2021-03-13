@@ -1,11 +1,35 @@
 package com.orderservice.api.model;
 
+
+import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+import java.util.Objects;
+
+@Entity
+@Table(name = "tb_cliente")
 public class Client {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @NotBlank
+    @Size(max = 50)
     private String name;
+
+    @NotBlank
+    @Email
+    @Size(max = 255)
     private String email;
+
+    @Column(name = "fone")
+    @Size(max = 20)
     private String telefone;
+
+    public Client(){
+    }
 
     public Client(long id, String name, String email, String telefone) {
         this.id = id;
@@ -44,5 +68,18 @@ public class Client {
 
     public void setTelefone(String telefone) {
         this.telefone = telefone;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Client client = (Client) o;
+        return id == client.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
